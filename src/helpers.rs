@@ -19,9 +19,10 @@ pub fn new_link(size: usize) -> Box<str> {
 // }
 
 pub async fn haas_api(color: String, origin: String) -> Result<(), colors_transform::ParseError> {
+    let config = super::settings::get_config().expect("config should have passed checks before");
+
     let mut headers = header::HeaderMap::new();
-    //FIXME: take key as env argument
-    headers.insert("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI5OTFjYWI0MDFhY2E0NzQxYTI2ZmZhYWE5NjJjNjUyZCIsImlhdCI6MTcwNzg1NTg2NCwiZXhwIjoyMDIzMjE1ODY0fQ.bZ7c10pkyRp_jlXGbH482pl_IpGsuT6_3I3XMWPdJVU".parse().unwrap());
+    headers.insert("Authorization", format!("Bearer {}", config.get_string("haas_key").expect("Home Assistant API Key not provided")).parse().unwrap());
     headers.insert("Content-Type", "application/json".parse().unwrap());
     let rgb = hex_to_rgb(color);
 
@@ -32,16 +33,13 @@ pub async fn haas_api(color: String, origin: String) -> Result<(), colors_transf
 
     let rgb = rgb.await?;
 
-    match client.post("http://homeassistant.local:8123/api/states/sensor.thought_ping")
+    match client.post(format!("{}/api/states/sensor.thought_ping", config.get_string("haas_url").unwrap_or("http://homeassistant.local:8123".to_string())))
         .headers(headers)
-        .body(format!("{{\"state\":\"ping\", \"attributes\":{{\"red\":\"{}\", \"green\":\"{}\", \"blue\":\"{}\"}}, \"origin\":\"{}\", \"timestamp\":\"{}\"}}", rgb.0, rgb.1, rgb.2, origin, chrono::Utc::now().naive_utc()))
+        .body(format!("{{\"state\":\"ping\", \"attributes\":{{\"red\":\"{}\", \"green\":\"{}\", \"blue\":\"{}\", \"origin\":\"{}\", \"timestamp\":\"{}\"}}}}", rgb.0, rgb.1, rgb.2, origin, chrono::Utc::now().naive_utc()))
         .send().await {
         Ok(_) => Ok(()),
         Err(_) => Err(colors_transform::ParseError { message: "haas api error".parse().unwrap() })
     }
-    // println!("{}", res);
-
-    // Ok(())
 }
 
 async fn hex_to_rgb(hex: String) -> Result<(String, String, String), colors_transform::ParseError> {

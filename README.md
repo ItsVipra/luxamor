@@ -1,12 +1,11 @@
 # TODO
 - Configureability
-  - [ ] Link length
-  - [ ] HAAS key
-  - [ ] HAAS URL
-  - [ ] Ping timeout
-  - [ ] Ping name
-  - [ ] Port
-  - [ ] DB location?
+  - [X] Link length
+  - [X] HAAS key
+  - [X] HAAS URL
+  - [X] Ping timeout
+  - [X] Ping name
+  - [X] Port
 - Security
   - [ ] Admin auth
 - Code Quality
@@ -14,3 +13,6 @@
   - [ ] less cloning
 - Visuals
   - [ ] Nicer Ping template
+  - [ ] Copy button on admin page
+- Tests
+  - [ ] All the things

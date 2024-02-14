@@ -6,15 +6,19 @@ mod routes;
 mod schema;
 mod db_structs;
 mod helpers;
+mod settings;
 
 use rocket::{Rocket, Build};
-
 
 #[database("sqlite_database")]
 pub struct DbConn(diesel::SqliteConnection);
 
 #[launch]
 fn rocket() -> _ {
+    let config = settings::get_config().expect("unable to read config");
+
+
+
     use rocket::fairing::AdHoc;
     use rocket_dyn_templates::Template;
     use rocket::fs::{FileServer, relative};
