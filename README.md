@@ -1,0 +1,16 @@
+# TODO
+- Configureability
+  - [ ] Link length
+  - [ ] HAAS key
+  - [ ] HAAS URL
+  - [ ] Ping timeout
+  - [ ] Ping name
+  - [ ] Port
+  - [ ] DB location?
+- Security
+  - [ ] Admin auth
+- Code Quality
+  - [ ] less String more str
+  - [ ] less cloning
+- Visuals
+  - [ ] Nicer Ping template

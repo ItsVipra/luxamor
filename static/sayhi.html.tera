@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Say hi to Vivi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  {% if latest %}
+  <script>
+    let timestamp = new Date("{{ latest.timestamp }}Z");
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        let button = document.querySelector("#sendPing");
+        let timeRemain = document.querySelector("#timeRemain");
+        setInterval(() => {
+                if (Date.now() - timestamp < 300000) {
+                    console.log("Button disabled");
+                    button.setAttribute("disabled", "disabled");
+                    timeRemain.style.height = "1em";
+                    const diffTime = 300000 - (Date.now() - timestamp);
+                    const diffMins = Math.floor(diffTime / (1000 * 60));
+                    const diffSecs = Math.ceil((diffTime / 1000) % 60);
+                    console.log(`${Date.now()} - ${timestamp} = ${diffTime} = ${diffMins}:${diffSecs} `)
+                    timeRemain.textContent = `You can send another in: ${diffMins}:${String(diffSecs).padStart(2, '0')}`;
+
+                } else {
+                    button.removeAttribute("disabled");
+                    console.log("Button enabled");
+                    timeRemain.style.height = "0px";
+                    timeRemain.textContent = "";
+                }
+            }
+            ,1000);
+    });
+
+
+
+  </script>
+  {% endif %}
+</head>
+<body>
+<div class="container">
+{% for u in user %}
+          {% if u.enabled %}
+    <h1>Hello there {{ u.name }}.</h1><h2> Choose a color below and ping Vivi.</h2>
+    {% if latest %}
+    <p>Last ping sent at: {{ latest.timestamp }}</p>
+    <p id="timeRemain" style="height: 0px;"></p>
+    {% endif %}
+
+    <form action="/user/{{ u.link }}" method="post">
+        <div class="two columns">
+            <input type="color" placeholder="#ff0000"
+                   name="color" id="color" value="{% if latest %}{{ latest.color }}{% endif %}" autofocus
+                   class="u-full-width {% if flash %}field-{{flash.0}}{% endif %}" />
+            {% if flash %}
+            <small class="field-{{flash.0}}-msg">
+                {{ flash.1 }}
+            </small>
+            {% endif %}
+        </div>
+        <div class="two columns">
+            <input type="submit" id="sendPing" value="Send Ping">
+        </div>
+    </form>
+    {% else %}
+    This link is currently paused.
+    {% endif %}
+{% else %}
+<h1>Hello there stranger. If you want to send pings to Vivi, you'll have to ask for a link.</h1>
+{% endfor %}
+</div>
+</body>
+</html>
