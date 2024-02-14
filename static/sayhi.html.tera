@@ -14,17 +14,18 @@
   {% if latest %}
   <script>
     let timestamp = new Date("{{ latest.timestamp }}Z");
+    let timeout = {{ meta.0 }};
 
 
     document.addEventListener("DOMContentLoaded", () => {
         let button = document.querySelector("#sendPing");
         let timeRemain = document.querySelector("#timeRemain");
         setInterval(() => {
-                if (Date.now() - timestamp < 300000) {
+                if (Date.now() - timestamp < timeout) {
                     console.log("Button disabled");
                     button.setAttribute("disabled", "disabled");
                     timeRemain.style.height = "1em";
-                    const diffTime = 300000 - (Date.now() - timestamp);
+                    const diffTime = timeout - (Date.now() - timestamp);
                     const diffMins = Math.floor(diffTime / (1000 * 60));
                     const diffSecs = Math.ceil((diffTime / 1000) % 60);
                     console.log(`${Date.now()} - ${timestamp} = ${diffTime} = ${diffMins}:${diffSecs} `)
@@ -49,7 +50,7 @@
 <div class="container">
 {% for u in user %}
           {% if u.enabled %}
-    <h1>Hello there {{ u.name }}.</h1><h2> Choose a color below and ping Vivi.</h2>
+    <h1>Hello there {{ u.name }}.</h1><h2> Choose a color below and ping {% if meta.1 %}{{ meta.1 }}{% else %}{{ "a mysterious person" }}{% endif %}.</h2>
     {% if latest %}
     <p>Last ping sent at: {{ latest.timestamp }}</p>
     <p id="timeRemain" style="height: 0px;"></p>
@@ -74,7 +75,7 @@
     This link is currently paused.
     {% endif %}
 {% else %}
-<h1>Hello there stranger. If you want to send pings to Vivi, you'll have to ask for a link.</h1>
+<h1>Hello there stranger.</h1><h2>If you want to send pings to {% if meta.1 %}{{ meta.1 }}{% else %}{{ "a mysterious person" }}{% endif %}, you'll have to ask for a link.</h2>
 {% endfor %}
 </div>
 </body>

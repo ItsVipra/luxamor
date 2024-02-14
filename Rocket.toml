@@ -3,3 +3,11 @@ template_dir = "static"
 
 [default.databases.sqlite_database]
 url = "db/db.sqlite"
+
+[debug]
+address = "127.0.0.1"
+port = 5892
+
+[production]
+address = "127.0.0.1"
+port = 5892

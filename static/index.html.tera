@@ -58,7 +58,7 @@
               <input type="hidden" name="_method" value="put" />
               <button class="small" type="submit">pause</button>
             </form>
-            <form class="inline" action="/user/{{user.id}}}" method="post">
+            <form class="inline" action="/user/{{user.id}}" method="post">
               <input type="hidden" name="_method" value="delete" />
               <button class="primary small" type="submit">delete</button>
             </form>

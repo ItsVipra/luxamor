@@ -11,10 +11,12 @@ use crate::helpers;
 
 #[post("/", data = "<user_form>")]
 pub async fn new(user_form: Form<NewUser>, conn: DbConn) -> Flash<Redirect> {
+    let config = super::settings::get_config().expect("config should have passed checks before");
+
     let newuser = user_form.into_inner();
     if newuser.name.is_empty() {
         Flash::error(Redirect::to("/admin"), "Name cannot be empty.")
-    } else if let Err(e) = User::insert(newuser, helpers::new_link(8), &conn).await {
+    } else if let Err(e) = User::insert(newuser, helpers::new_link(config.get_int("link_len").unwrap_or(16) as usize), &conn).await {
         error_!("DB insertion error: {}", e);
         Flash::error(Redirect::to("/admin"), "User could not be inserted due an internal error.")
     } else {
@@ -35,13 +37,14 @@ pub async fn toggle(id: i32, conn: DbConn) -> Result<Redirect, Template> {
 
 #[get("/<link>")]
 pub async fn find(link: String, flash: Option<FlashMessage<'_>>,conn: DbConn) -> Result<Template, Redirect> {
+    let config = super::settings::get_config().expect("config should have passed checks before");
     let flash = flash.map(FlashMessage::into_inner);
 
     match User::find_with_link(link.clone(), &conn).await {
         Ok(l) => {
             let latest = Ping::get_latest_by_origin(link, &conn).await.unwrap();
             let latest = latest.first();
-            Ok(Template::render("sayhi", LinkContext { user: l, flash, latest: latest.cloned() }))
+            Ok(Template::render("sayhi", LinkContext { user: l, flash, latest: latest.cloned(), meta: (config.get_int("ping_timeout").unwrap_or(300)*1000, config.get_string("admin_name").ok()) }))
         },
         Err(_) => Err(Redirect::to("/admin"))
     }
@@ -53,12 +56,14 @@ pub async fn ping(link: String,thought_form: Form<Thought>, conn:DbConn) -> Flas
     let latest = Ping::get_latest_by_origin(link.clone(), &conn).await.unwrap();
     let latest = latest.first();
 
+    let config = super::settings::get_config().expect("config should have passed checks before");
 
-    if ! helpers::valid_hex(&thought.color) {
+
+    if !helpers::valid_hex(&thought.color) {
         return Flash::error(Redirect::to(format!("/user/{}", link)), "That's not a color, wha?");
     }
 
-    if (chrono::Utc::now().naive_utc() - latest.unwrap_or(&Ping::default()).timestamp.unwrap_or_default()) > chrono::Duration::minutes(5)
+    if (chrono::Utc::now().naive_utc() - latest.unwrap_or(&Ping::default()).timestamp.unwrap_or_default()) > chrono::Duration::seconds(config.get_int("ping_timeout").unwrap_or(300))
         || latest.is_none() {
         match Ping::insert(thought.clone(), link.clone(), &conn).await {
             Ok(_) => {
@@ -73,7 +78,7 @@ pub async fn ping(link: String,thought_form: Form<Thought>, conn:DbConn) -> Flas
             }
         }
     } else {
-        Flash::error(Redirect::to(format!("/user/{}", link)), "Last ping was less than 5 minutes ago, please wait")
+        Flash::error(Redirect::to(format!("/user/{}", link)), format!("Last ping was less than {} minutes ago, please wait", config.get_int("ping_timeout").unwrap_or(300)/60))
     }
 }
 
@@ -141,5 +146,6 @@ impl Context {
 struct LinkContext {
     user: Vec<User>,
     flash: Option<(String, String)>,
-    latest: Option<Ping>
+    latest: Option<Ping>,
+    meta: (i64, Option<String>)
 }
