@@ -7,7 +7,8 @@
   - [X] Ping name
   - [X] Port
 - Security
-  - [ ] Admin auth
+  - [X] Admin auth
+  - [X] Rate Limit
 - Code Quality
   - [ ] less String more str
   - [ ] less cloning

@@ -1,5 +1,6 @@
 use diesel::{QueryResult, RunQueryDsl, prelude::*};
 use rocket::serde::Serialize;
+use rocket::FromForm;
 use crate::DbConn;
 use crate::schema::pings;
 
