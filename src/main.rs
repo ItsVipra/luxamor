@@ -26,7 +26,17 @@ fn rocket() -> _ {
         println!("Your password for this run: {color_green}{}{color_reset}", config.get_string("PRE_SHARED_KEY").expect("just passed check"));
     }
 
+    use config::Config;
+    let rocket_conf = Config::builder().
+        add_source(config::File::with_name("Rocket.toml"))
+        .build().unwrap();
 
+    if rocket_conf.get_table("release").is_ok_and(|r| r.get("secret_key").is_none()) {
+        use inline_colorization::*;
+        println!("{color_red}{style_bold}Error:{style_reset} {color_red}Rocket needs to be provided with a secret key to encrypt cookies.");
+        println!("{color_blue}{style_bold}Hint:{style_reset} Generate one with {color_blue}'openssl rand -base64 32'{color_reset} and place it in {color_blue}'Rocket.toml' as 'secret_key'{color_reset}");
+        println!("This app will now crash :3");
+    }
 
     use rocket::fairing::AdHoc;
     use rocket_dyn_templates::Template;
