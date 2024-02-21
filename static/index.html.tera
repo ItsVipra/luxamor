@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Rocket Todo Example</title>
+  <title>luxamor admin interface</title>
   <meta name="description" content="A todo application written in Rocket.">
   <meta name="author" content="Sergio Benitez">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -80,6 +80,9 @@
         </ul>
       </div>
     </div>
+    <form action="/admin/logout" method="post">
+      <button type="submit">log out</button>
+    </form>
   </div>
 </body>
 </html>

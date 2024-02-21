@@ -1,4 +1,4 @@
-#[macro_use] extern crate rocket;
+// #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_sync_db_pools;
 #[macro_use] extern crate diesel;
 
@@ -7,30 +7,41 @@ mod schema;
 mod db_structs;
 mod helpers;
 mod settings;
+mod tests;
 
-use rocket::{Rocket, Build};
+use rocket::{Rocket, Build, catchers};
 
 #[database("sqlite_database")]
 pub struct DbConn(diesel::SqliteConnection);
 
-#[launch]
+#[rocket::launch]
 fn rocket() -> _ {
     let config = settings::get_config().expect("unable to read config");
+
+    if config.get_string("PRE_SHARED_KEY").is_err() {
+        println!("Pre shared key configuration not set!");
+        println!("Please set a key in luxamor.toml");
+        panic!("PRE_SHARED_KEY not set");
+    }
 
 
 
     use rocket::fairing::AdHoc;
     use rocket_dyn_templates::Template;
     use rocket::fs::{FileServer, relative};
-    use crate::routes::*;
+    use rocket::routes;
+    use crate::routes::admin::*;
+    use crate::routes::user::*;
+    use rocket_governor::rocket_governor_catcher;
 
     rocket::build()
         .attach(DbConn::fairing())
         .attach(Template::fairing())
         .attach(AdHoc::on_ignite("Run Migrations", run_migrations))
         .mount("/", FileServer::from(relative!("static")))
-        .mount("/admin", routes![index])
+        .mount("/admin", routes![index, no_auth_index, login, login_page, post_login, logout])
         .mount("/user", routes![new, toggle, delete, find, ping])
+        .register("/", catchers!(rocket_governor_catcher))
 
 }
 
