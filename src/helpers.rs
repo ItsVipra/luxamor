@@ -1,17 +1,20 @@
 use colors_transform::Color;
-use rand::Rng;
+// use rand::Rng;
 use reqwest::header;
 
-pub fn new_link(size: usize) -> Box<str> {
+pub fn new_link(size: usize) -> String {
+    use rand::seq::SliceRandom;
     const BASE59: &[u8] = b"0123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghiklmnopqrstuvwxyz";
 
-    let mut id = String::with_capacity(size);
     let mut rng = rand::thread_rng();
-    for _ in 0..size {
-        id.push(BASE59[rng.gen::<usize>() % 59] as char);
-    }
+    // let mut id = String::with_capacity(size);
+    // for _ in 0..size {
+    //     id.push(BASE59[rng.gen::<usize>() % 59] as char);
+    // }
 
-    Box::from(id)
+    let id = (0..size).map(|_| *BASE59.choose(&mut rng).unwrap() as char).collect();
+
+    id
 }
 
 // async fn peel(query: QueryResult<Vec<Ping>>) -> Option<Ping> {
@@ -43,15 +46,7 @@ pub async fn haas_api(color: String, origin: String) -> Result<(), colors_transf
 }
 
 async fn hex_to_rgb(hex: String) -> Result<(String, String, String), colors_transform::ParseError> {
-    let rgb = colors_transform::Rgb::from_hex_str(&hex);
-    match rgb {
-        Ok(rgb) => {
-            Ok((rgb.get_red().to_string(), rgb.get_green().to_string(), rgb.get_blue().to_string()))
-        }
-        Err(e) => {
-            Err(e)
-        }
-    }
+    colors_transform::Rgb::from_hex_str(&hex).map(|rgb|(rgb.get_red().to_string(), rgb.get_green().to_string(), rgb.get_blue().to_string()))
 }
 
 pub fn valid_hex(hex: &str) -> bool {

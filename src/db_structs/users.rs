@@ -1,3 +1,4 @@
+use rocket::FromForm;
 use diesel::{QueryResult, RunQueryDsl, prelude::*};
 use crate::DbConn;
 use crate::schema::users;
@@ -27,9 +28,9 @@ impl User {
     }
 
     /// Returns the number of affected rows: 1.
-    pub async fn insert(newuser: NewUser, link: Box<str>, conn: &DbConn) -> QueryResult<usize> {
+    pub async fn insert(newuser: NewUser, link: String, conn: &DbConn) -> QueryResult<usize> {
         conn.run(move|c| {
-            let t = User { id: None, name: newuser.name, link: Some(link.to_string()), enabled: true };
+            let t = User { id: None, name: newuser.name, link: Some(link), enabled: true };
             diesel::insert_into(users::table).values(&t).execute(c)
         }).await
     }
