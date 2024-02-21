@@ -18,10 +18,12 @@ pub struct DbConn(diesel::SqliteConnection);
 fn rocket() -> _ {
     let config = settings::get_config().expect("unable to read config");
 
-    if config.get_string("PRE_SHARED_KEY").is_err() {
-        println!("Pre shared key configuration not set!");
-        println!("Please set a key in luxamor.toml");
-        panic!("PRE_SHARED_KEY not set");
+    if config.get_string("PRE_SHARED_KEY").expect("should always have a default value").starts_with("RUNTIME_GENERATED") {
+        use inline_colorization::*;
+        println!("{color_yellow}{style_bold}Warning:{style_reset} Pre shared key configuration not set!{color_reset}");
+        println!("{color_blue}Hint:{style_reset} Your password will be automatically generated each run{color_reset}");
+        println!("{color_blue}Help:{style_reset} To avoid this {color_blue}set 'PRE_SHARED_KEY' in luxamor.toml{color_reset}");
+        println!("Your password for this run: {color_green}{}{color_reset}", config.get_string("PRE_SHARED_KEY").expect("just passed check"));
     }
 
 

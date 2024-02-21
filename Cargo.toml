@@ -16,6 +16,7 @@ colors-transform = "0.2.11"
 config = { version = "0.14.0" ,features = ["toml"] }
 lazy_static = "1.4.0"
 rocket-governor = "0.2.0-rc.1"
+inline_colorization = "0.1.6"
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0"
