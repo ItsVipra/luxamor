@@ -1,0 +1,6 @@
+[target.armv7-unknown-linux-gnueabihf]
+pre-build = [
+    "dpkg --add-architecture armhf",
+    "apt-get update && apt-get install libssl-dev:armhf -y",
+    "apt-get install libsqlite3-dev:armhf -y"
+]

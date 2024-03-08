@@ -16,6 +16,11 @@ These instructions assume you have Rust, Cargo, and sqlite installed.
    - just `cargo run` is fine, if you want more console output
 6. navigate to `localhost:5892/admin` to sign in to the admin interface
 
+### Cross-compiling for ARM
+If you want to run this app on ARM (e.g. raspberry pi) you can cross-compile it with [cross-rs](https://github.com/cross-rs/cross).
+Usage is the same as cargo, so for ARM compilation execute `(sudo) cross build -r --target armv7-unknown-linux-gnueabihf
+`.
+
 ---
 # TODO
 - Configureability
