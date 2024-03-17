@@ -8,6 +8,7 @@ mod db_structs;
 mod helpers;
 mod settings;
 mod tests;
+mod ratelimit;
 
 use rocket::{Rocket, Build, catchers};
 

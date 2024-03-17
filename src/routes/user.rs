@@ -16,15 +16,8 @@ lazy_static! {
     static ref CONFIG: config::Config = super::super::settings::get_config().expect("config should have passed checks before");
 }
 
-use rocket_governor::{Method, Quota, RocketGovernable, RocketGovernor};
-
-pub struct RateLimitGuard;
-
-impl<'r> RocketGovernable<'r> for RateLimitGuard {
-    fn quota(_method: Method, _route_name: &str) -> Quota {
-        Quota::per_minute(Self::nonzero(100u32))
-    }
-}
+use crate::ratelimit::RateLimitGuard;
+use rocket_governor::RocketGovernor;
 
 #[get("/<link>")]
 pub async fn find(link: String, flash: Option<FlashMessage<'_>>,conn: DbConn, _limitguard: RocketGovernor<'_, RateLimitGuard>) -> Result<Template, Status> {
@@ -57,6 +50,7 @@ pub async fn ping(link: String,thought_form: Form<Thought>, conn:DbConn, _limitg
     }
 
     if !helpers::valid_hex(&thought.color) {
+        println!("Invalid color data submitted at {}", link);
         return Err((Status::BadRequest, "That's not a color, wha? (try #b00b69)")); // Flash::error(Redirect::to(format!("/user/{}", link)), "That's not a color, wha?"));
     }
 
@@ -64,8 +58,10 @@ pub async fn ping(link: String,thought_form: Form<Thought>, conn:DbConn, _limitg
         || latest.is_none() {
         match Ping::insert(thought.clone(), link.clone(), &conn).await {
             Ok(_) => {
-                match helpers::haas_api(thought.color, link.clone()).await {
-                    Ok(_) => Ok(Flash::success(Redirect::to(format!("/user/{}", link)), "Ping sent")),
+                match helpers::haas_api(thought.color.clone(), link.clone()).await {
+                    Ok(_) => {
+                        println!("Ping sent from {} with color {}", link.clone(), thought.color);
+                        Ok(Flash::success(Redirect::to(format!("/user/{}", link)), "Ping sent")) },
                     Err(_) => Ok(Flash::error(Redirect::to(format!("/user/{}", link)), "Ping could not be sent due to an Home Assistant API error."))
                 }
             },

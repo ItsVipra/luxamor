@@ -33,6 +33,7 @@ Usage is the same as cargo, so for ARM compilation execute `(sudo) cross build -
 - Security
   - [X] Admin auth
   - [X] Rate Limit
+  - [X] Rate limit on admin (factor out)
 - Code Quality
   - [ ] less String more str
   - [ ] less cloning
