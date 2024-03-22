@@ -32,7 +32,7 @@ fn rocket() -> _ {
         add_source(config::File::with_name("Rocket.toml"))
         .build().unwrap();
 
-    if rocket_conf.get_table("release").is_ok_and(|r| r.get("secret_key").is_none()) {
+    if !cfg!(debug_assertions) && rocket_conf.get_table("release").is_ok_and(|r| r.get("secret_key").is_none()) {
         use inline_colorization::*;
         println!("{color_red}{style_bold}Error:{style_reset} {color_red}Rocket needs to be provided with a secret key to encrypt cookies.");
         println!("{color_blue}{style_bold}Hint:{style_reset} Generate one with {color_blue}'openssl rand -base64 32'{color_reset} and place it in {color_blue}'Rocket.toml' as 'secret_key'{color_reset}");
