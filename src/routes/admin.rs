@@ -3,8 +3,8 @@ use rocket::response::{Flash, Redirect};
 use rocket::form::Form;
 use rocket::serde::Serialize;
 use rocket_dyn_templates::Template;
-use rocket::{post, put, get, delete, error_, routes};
-use rocket::http::{Status, CookieJar};
+use rocket::{post, put, get, delete, error_, routes, Rocket, Response, http};
+use rocket::http::{Status, CookieJar, ContentType};
 use rocket::outcome::IntoOutcome;
 
 use crate::DbConn;
@@ -113,6 +113,15 @@ pub async fn delete(id: i32, conn: DbConn, _admin: Admin) -> Result<Flash<Redire
             error_!("DB deletion({}) error: {}", id, e);
             Err(Template::render("index", Context::err(&conn, "Failed to delete user.").await))
         }
+    }
+}
+
+#[get("/latest")]
+pub async fn latest(conn: DbConn, _admin: Admin, _limitguard: RocketGovernor<'_, RateLimitGuard>) -> Result<(Status, rocket::serde::json::Json<Ping>), http::Status> {
+    let latest= Ping::get_latest(&conn).await.unwrap();
+    match latest.first() {
+        Some(p) => Ok((Status::Ok, rocket::serde::json::Json(p.clone()))),
+        None => Err(Status::NotFound)
     }
 }
 

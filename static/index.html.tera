@@ -12,6 +12,97 @@
   <link rel="stylesheet" href="/css/skeleton.css">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
+
+
+  <script>
+    function timeDifference(current, previous) {
+
+      const msPerMinute = 60 * 1000;
+      const msPerHour = msPerMinute * 60;
+      const msPerDay = msPerHour * 24;
+      const msPerMonth = msPerDay * 30;
+      const msPerYear = msPerDay * 365;
+
+      const elapsed = current - previous;
+
+      if (elapsed < msPerMinute) {
+        return Math.round(elapsed/1000) + ' seconds ago';
+      }
+
+      else if (elapsed < msPerHour) {
+        return Math.round(elapsed/msPerMinute) + ' minutes ago';
+      }
+
+      else if (elapsed < msPerDay ) {
+        return Math.round(elapsed/msPerHour ) + ' hours ago';
+      }
+
+      else if (elapsed < msPerMonth) {
+        return 'approximately ' + Math.round(elapsed/msPerDay) + ' days ago';
+      }
+
+      else if (elapsed < msPerYear) {
+        return 'approximately ' + Math.round(elapsed/msPerMonth) + ' months ago';
+      }
+
+      else {
+        return 'approximately ' + Math.round(elapsed/msPerYear ) + ' years ago';
+      }
+    }
+
+    function find_name_with_link(id) {
+      let links = document.querySelectorAll(".twelve.columns a");
+      for (const link of links) {
+        if (link.href.includes(id)) {
+          return link.textContent;
+        }
+      }
+      return id;
+    }
+
+    let latest_ping_timestamp ={% if latest_ping.0 %} new Date("{{ latest_ping.0.timestamp }}Z"){% else %} new Date(0){% endif %};
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // timeP.textContent = timeP.textContent + ` (${timeDifference(Date.now(), latest_ping_timestamp)})`;
+
+      setInterval(async () => {
+        let timeDiv = document.querySelector("#latest_ping_div");
+
+
+        let response = await fetch(`${document.URL}/latest`);
+        let latest = await response.json()
+        console.log(latest);
+
+        if (new Date(`${latest.timestamp}Z`) > latest_ping_timestamp) {
+          latest_ping_timestamp = new Date(`${latest.timestamp}Z`);
+
+          let paragraph = document.createElement("p");
+          paragraph.textContent = `Last ping was from ${find_name_with_link(latest.origin)} at ${latest.timestamp}`;
+
+          const relative_placeholder = document.createElement("span");
+          relative_placeholder.id="relative_time";
+          paragraph.appendChild(relative_placeholder);
+
+          const color = document.createElement("div");
+          color.style.backgroundColor = latest.color;
+          color.classList.add("color_preview")
+          timeDiv.replaceChildren(paragraph, color);
+        }
+        let timeP = document.querySelector("#latest_ping_div p");
+
+        let relative_time = document.createElement("span");
+        relative_time.id = "relative_time"
+        relative_time.textContent = ` (${timeDifference(Date.now(), latest_ping_timestamp)})`;
+        timeP.replaceChild(relative_time, document.querySelector("#relative_time"));
+
+      }, 2000);
+    })
+
+
+
+
+  </script>
 </head>
 <body>
   <div class="container">
@@ -19,15 +110,18 @@
 
     <div class="row">
       <h4>Luxamor Admin interface</h4>
-      <div class="row">
+      <div class="row" id="latest_ping_div">
       {% if latest_ping.0 %}
                 <p>Last ping was from {% if latest_ping.1.name %}
                     {{ latest_ping.1.name }}
                     {% else %}{{"a deleted user"}}
                   {% endif %} at
                     {{ latest_ping.0.timestamp }}
-                  <div style="background-color: {{ latest_ping.0.color }}; height: 1em;"></div>
-        </p>
+                <span id="relative_time">
+                   (??? ago)
+                </span>
+                </p>
+                  <div class="color_preview" style="background-color: {{ latest_ping.0.color }};"></div>
       {% endif %}
       </div>
       <form action="/user" method="post">

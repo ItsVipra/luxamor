@@ -56,3 +56,12 @@ button.small {
   line-height: 20px;
   margin: 0 2.5px;
 }
+
+#latest_ping_div>p {
+  margin-bottom: 1em;
+}
+
+.color_preview {
+  height: 1em;
+  margin-bottom: 1em;
+}

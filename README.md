@@ -40,5 +40,7 @@ Usage is the same as cargo, so for ARM compilation execute `(sudo) cross build -
 - Visuals
   - [ ] Nicer Ping template
   - [ ] Copy button on admin page
+  - [X] Relative time for last ping on admin page
+  - [X] Dynamic polling of latest ping
 - Tests
   - [ ] All the things

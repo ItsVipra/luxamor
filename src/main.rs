@@ -52,7 +52,7 @@ fn rocket() -> _ {
         .attach(Template::fairing())
         .attach(AdHoc::on_ignite("Run Migrations", run_migrations))
         .mount("/", FileServer::from(relative!("static")))
-        .mount("/admin", routes![index, no_auth_index, login, login_page, post_login, logout])
+        .mount("/admin", routes![index, no_auth_index, login, login_page, post_login, logout, latest])
         .mount("/user", routes![new, toggle, delete, find, ping])
         .register("/", catchers!(rocket_governor_catcher))
 
