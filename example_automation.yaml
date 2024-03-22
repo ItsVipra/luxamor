@@ -1,0 +1,41 @@
+alias: Luxamor Ping Automation
+description: "When receiving a Luxamor ping, saves current state of specified lights, sets their color to the one pinged, and restores previous state after a few seconds."
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.luxamor_ping
+condition:
+  # checks whether a light is already on, so you don't get woken by pings in the middle of the night
+  - condition: device
+    type: is_on
+    device_id: XYZ
+    entity_id: ZYX
+    domain: light
+action:
+  - service: scene.create
+    metadata: {}
+    data:
+      snapshot_entities:
+        - your
+        - entities
+      scene_id: pre_luxamor_ping
+  - service: light.turn_on
+    data:
+      rgb_color:
+        - "{{ (state_attr('sensor.luxamor_ping', 'red')| int) }}"
+        - "{{ (state_attr('sensor.luxamor_ping', 'green')| int) }}"
+        - "{{ (state_attr('sensor.luxamor_ping', 'blue') | int )}}"
+      effect: "Solid"
+    target:
+      entity_id: your light(s)
+  - delay:
+      # customize to your liking
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.pre_luxamor_ping
+mode: single

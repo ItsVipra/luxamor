@@ -36,7 +36,7 @@ pub async fn haas_api(color: String, origin: String) -> Result<(), colors_transf
 
     let rgb = rgb.await?;
 
-    match client.post(format!("{}/api/states/sensor.thought_ping", config.get_string("haas_url").unwrap_or("http://homeassistant.local:8123".to_string())))
+    match client.post(format!("{}/api/states/sensor.luxamor_ping", config.get_string("haas_url").unwrap_or("http://homeassistant.local:8123".to_string())))
         .headers(headers)
         .body(format!("{{\"state\":\"ping\", \"attributes\":{{\"red\":\"{}\", \"green\":\"{}\", \"blue\":\"{}\", \"origin\":\"{}\", \"timestamp\":\"{}\"}}}}", rgb.0, rgb.1, rgb.2, origin, chrono::Utc::now().naive_utc()))
         .send().await {
