@@ -62,15 +62,17 @@ pub fn login_page(flash: Option<FlashMessage<'_>>) -> Template {
 use crate::ratelimit::RateLimitGuard;
 use rocket_governor::RocketGovernor;
 #[post("/login", data = "<login>")]
-pub fn post_login(jar: &CookieJar<'_>, login: Form<Login<'_>>, _limitguard: RocketGovernor<'_, RateLimitGuard>) -> Flash<Redirect> {
+pub async fn post_login(jar: &CookieJar<'_>, login: Form<Login<'_>>, _limitguard: RocketGovernor<'_, RateLimitGuard>) -> Flash<Redirect> {
+    let request_time = rocket::tokio::time::Instant::now();
     let psk = CONFIG.get_string("PRE_SHARED_KEY").expect("pre shared key has to be set");
     if login.password == psk {
         jar.add_private(("user_psk", psk));
         println!("Successful admin login");
         Flash::success(Redirect::to("/admin"), "Successfully logged in")
     } else {
-        error_!("Failed admin login attempt, with psk: {}", psk);
+        error_!("Failed admin login attempt, with: {}", login.password);
         // println!("Failed admin login attempt, with psk: {}", psk);
+        rocket::tokio::time::sleep_until(request_time + std::time::Duration::from_millis(500)).await;
         Flash::error(Redirect::to("/admin/login"), "Invalid password.")
     }
 }
